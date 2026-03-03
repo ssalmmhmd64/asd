@@ -1,1 +1,534 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>لوحة تحكم البوت — Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <meta name="description" content="لوحة تحكم خاصة لبوت ديسكورد — إعدادات، أوامر، لوج، ترحيب، إحصائيات" />
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">Salem Bot</div>
+      <div class="subtitle">لوحة تحكم خاصة</div>
+    </div>
+    <nav class="mainnav">
+      <a href="#overview" class="navlink">الرئيسية</a>
+      <a href="#settings" class="navlink">الإعدادات</a>
+      <a href="#commands" class="navlink">الأوامر</a>
+      <a href="#logs" class="navlink">اللوج</a>
+      <a href="#stats" class="navlink">الإحصائيات</a>
+      <a href="#account" class="navlink">الحساب</a>
+    </nav>
+    <div class="userarea">
+      <button id="btnLogout" class="btn small">تسجيل خروج</button>
+    </div>
+  </header>
 
+  <!-- SIDEBAR + MAIN LAYOUT -->
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-section">
+        <h4>القوائم</h4>
+        <ul>
+          <li><a href="#overview">نظرة عامة</a></li>
+          <li><a href="#settings">إعدادات عامة</a></li>
+          <li><a href="#commands">إدارة الأوامر</a></li>
+          <li><a href="#automations">الأتمتة</a></li>
+          <li><a href="#roles">إدارة الرولات</a></li>
+          <li><a href="#logs">سجل الأحداث</a></li>
+          <li><a href="#stats">الإحصائيات</a></li>
+          <li><a href="#backup">نسخ احتياطي</a></li>
+        </ul>
+      </div>
+
+      <div class="side-section">
+        <h4>الوضع</h4>
+        <div class="status">
+          <div>حالة البوت: <span id="botStatus" class="badge green">متصل</span></div>
+          <div>آخر تحديث: <span id="lastUpdate">—</span></div>
+        </div>
+      </div>
+
+      <div class="side-section">
+        <h4>سيرفرات</h4>
+        <select id="guildSelect" class="full">
+          <option value="">اختر السيرفر</option>
+        </select>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- OVERVIEW -->
+      <section id="overview" class="panel">
+        <h2>نظرة عامة</h2>
+        <p class="muted">ملخص سريع عن حالة البوت والإحصائيات الأساسية.</p>
+
+        <div class="grid-3">
+          <div class="statcard">
+            <h3 id="statServers">0</h3>
+            <p>السيرفرات المتصلة</p>
+          </div>
+          <div class="statcard">
+            <h3 id="statUsers">0</h3>
+            <p>المستخدمين الإجمالي</p>
+          </div>
+          <div class="statcard">
+            <h3 id="statCommands">0</h3>
+            <p>عدد الأوامر المفعلة</p>
+          </div>
+        </div>
+
+        <div class="panel-row">
+          <div class="panel-block">
+            <h4>آخر الأحداث</h4>
+            <ul id="recentEvents" class="list"></ul>
+          </div>
+
+          <div class="panel-block">
+            <h4>تنبيهات النظام</h4>
+            <div id="alerts" class="alerts"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settings" class="panel">
+        <h2>الإعدادات العامة</h2>
+        <p class="muted">تحكم بالإعدادات الأساسية للبوت من هنا. التغييرات تحفظ محليًا ثم تُرسل للباك‑إند عند الضغط على حفظ.</p>
+
+        <form id="settingsForm" class="form">
+          <div class="form-row">
+            <label>كلمة مرور الدخول (محلي)</label>
+            <input type="password" id="adminPassword" placeholder="كلمة مرور خاصة" />
+          </div>
+
+          <div class="form-row">
+            <label>قناة الترحيب (ID)</label>
+            <input type="text" id="welcomeChannel" placeholder="مثال: 123456789012345678" />
+          </div>
+
+          <div class="form-row">
+            <label>رسالة الترحيب</label>
+            <textarea id="welcomeMessage" rows="3" placeholder="مرحبًا {user} في سيرفرنا!"></textarea>
+          </div>
+
+          <div class="form-row">
+            <label>قناة اللوج (ID)</label>
+            <input type="text" id="logChannel" placeholder="مثال: 123456789012345678" />
+          </div>
+
+          <div class="form-row inline">
+            <label><input type="checkbox" id="enableWelcome" /> تفعيل الترحيب</label>
+            <label><input type="checkbox" id="enableLog" /> تفعيل اللوج</label>
+            <label><input type="checkbox" id="enableAutoRole" /> تفعيل الرول التلقائي</label>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="btnSaveSettings" class="btn primary">حفظ الإعدادات</button>
+            <button type="button" id="btnResetSettings" class="btn">إعادة تعيين</button>
+          </div>
+        </form>
+
+        <hr />
+
+        <h3>إعدادات متقدمة</h3>
+        <div class="adv-grid">
+          <div class="adv-card">
+            <h4>التحكم بالـ Prefix</h4>
+            <input type="text" id="botPrefix" placeholder="مثال: !" />
+            <button id="btnSavePrefix" class="btn small">حفظ</button>
+          </div>
+
+          <div class="adv-card">
+            <h4>الحد الأقصى للرسائل المحذوفة</h4>
+            <input type="number" id="maxBulkDelete" min="1" max="100" value="50" />
+            <button id="btnSaveBulk" class="btn small">حفظ</button>
+          </div>
+
+          <div class="adv-card">
+            <h4>إعدادات الترحيب المتقدمة</h4>
+            <label>إرفاق صورة ترحيب</label>
+            <input type="text" id="welcomeImage" placeholder="رابط الصورة" />
+            <button id="btnSaveWelcomeImage" class="btn small">حفظ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMMANDS -->
+      <section id="commands" class="panel">
+        <h2>إدارة الأوامر</h2>
+        <p class="muted">أضف، عدّل، فعّل أو عطّل أوامر البوت من هنا. كل أمر يحتوي وصفًا، صلاحيات، وحالة تفعيل.</p>
+
+        <div class="commands-toolbar">
+          <input type="text" id="cmdSearch" placeholder="ابحث عن أمر..." />
+          <button id="btnNewCmd" class="btn">أمر جديد</button>
+        </div>
+
+        <div id="commandsList" class="commands-list">
+          <!-- عناصر الأوامر تُضاف ديناميكيًا -->
+        </div>
+
+        <!-- نموذج إضافة/تعديل أمر (مخفي افتراضيًا) -->
+        <div id="cmdModal" class="modal hidden">
+          <div class="modal-content">
+            <h3 id="cmdModalTitle">أمر جديد</h3>
+            <label>اسم الأمر</label>
+            <input type="text" id="cmdName" placeholder="مثال: greet" />
+            <label>الوصف</label>
+            <input type="text" id="cmdDesc" placeholder="مثال: يرسل رسالة ترحيب" />
+            <label>الصلاحية المطلوبة</label>
+            <select id="cmdPerm">
+              <option value="everyone">الكل</option>
+              <option value="moderator">مشرف</option>
+              <option value="admin">مدير</option>
+            </select>
+            <label>النص الذي ينفّذه البوت</label>
+            <textarea id="cmdResponse" rows="4" placeholder="مثال: مرحبًا {user}"></textarea>
+            <div class="form-actions">
+              <button id="btnSaveCmd" class="btn primary">حفظ الأمر</button>
+              <button id="btnCancelCmd" class="btn">إلغاء</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AUTOMATIONS -->
+      <section id="automations" class="panel">
+        <h2>الأتمتة والمهام المجدولة</h2>
+        <p class="muted">جدولة مهام أوتوماتيكية مثل تنظيف القنوات، إرسال تقارير، أو تشغيل أحداث دورية.</p>
+
+        <div class="task-grid">
+          <div class="task-card">
+            <h4>تنظيف القنوات</h4>
+            <label>القناة (ID)</label>
+            <input type="text" id="cleanChannel" placeholder="ID" />
+            <label>الجدول</label>
+            <input type="text" id="cleanCron" placeholder="مثال: 0 3 * * *" />
+            <button id="btnSaveClean" class="btn small">حفظ</button>
+          </div>
+
+          <div class="task-card">
+            <h4>تقرير يومي</h4>
+            <label>قناة التقرير</label>
+            <input type="text" id="reportChannel" placeholder="ID" />
+            <label>وقت الإرسال</label>
+            <input type="time" id="reportTime" />
+            <button id="btnSaveReport" class="btn small">حفظ</button>
+          </div>
+
+          <div class="task-card">
+            <h4>نسخ احتياطي</h4>
+            <label>مسار الحفظ</label>
+            <input type="text" id="backupPath" placeholder="/backups" />
+            <button id="btnRunBackup" class="btn small">تشغيل الآن</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ROLES -->
+      <section id="roles" class="panel">
+        <h2>إدارة الرولات</h2>
+        <p class="muted">تعيين رول تلقائي، إعداد صلاحيات، ومزامنة الرولات.</p>
+
+        <div class="roles-grid">
+          <div class="role-card">
+            <h4>الرول التلقائي</h4>
+            <input type="text" id="autoRole" placeholder="@Member" />
+            <button id="btnSaveAutoRole" class="btn">حفظ</button>
+          </div>
+
+          <div class="role-card">
+            <h4>مزامنة الرولات</h4>
+            <p class="muted">مزامنة الرولات بين السيرفر وقاعدة البيانات.</p>
+            <button id="btnSyncRoles" class="btn">مزامنة الآن</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOGS -->
+      <section id="logs" class="panel">
+        <h2>سجل الأحداث (Logs)</h2>
+        <p class="muted">عرض الأحداث المسجلة: حذف رسائل، طرد، بان، تغييرات إعدادات.</p>
+
+        <div class="log-controls">
+          <input type="text" id="logFilter" placeholder="فلتر حسب النوع أو المستخدم" />
+          <button id="btnExportLogs" class="btn">تصدير</button>
+          <button id="btnClearLogs" class="btn danger">مسح السجل</button>
+        </div>
+
+        <div id="logList" class="log-list"></div>
+      </section>
+
+      <!-- STATS -->
+      <section id="stats" class="panel">
+        <h2>الإحصائيات</h2>
+        <p class="muted">مخططات مبسطة وإحصاءات استخدام الأوامر والأنظمة.</p>
+
+        <div class="stats-grid">
+          <div class="chart-card">
+            <h4>استخدام الأوامر (آخر 7 أيام)</h4>
+            <canvas id="chartCommands" width="400" height="200"></canvas>
+          </div>
+
+          <div class="chart-card">
+            <h4>أعضاء نشطون</h4>
+            <canvas id="chartActive" width="400" height="200"></canvas>
+          </div>
+        </div>
+
+        <div class="stats-summary">
+          <div>أوامر اليوم: <strong id="todayCommands">0</strong></div>
+          <div>أعضاء نشطون اليوم: <strong id="todayActive">0</strong></div>
+        </div>
+      </section>
+
+      <!-- BACKUP -->
+      <section id="backup" class="panel">
+        <h2>نسخ احتياطي واستعادة</h2>
+        <p class="muted">إنشاء نسخة احتياطية من إعدادات البوت واستعادتها عند الحاجة.</p>
+
+        <div class="backup-row">
+          <button id="btnCreateBackup" class="btn">إنشاء نسخة احتياطية</button>
+          <input type="file" id="backupFile" />
+          <button id="btnRestoreBackup" class="btn">استعادة من ملف</button>
+        </div>
+
+        <div id="backupStatus" class="muted">لا توجد نسخ حتى الآن.</div>
+      </section>
+
+      <!-- ACCOUNT -->
+      <section id="account" class="panel">
+        <h2>حسابك</h2>
+        <p class="muted">معلومات الحساب، صلاحيات الوصول، وتفاصيل الجلسة.</p>
+
+        <div class="account-grid">
+          <div>
+            <label>اسم المستخدم</label>
+            <input type="text" id="accName" value="Salem" />
+          </div>
+          <div>
+            <label>البريد</label>
+            <input type="email" id="accEmail" value="salem@example.com" />
+          </div>
+          <div>
+            <label>صلاحية</label>
+            <select id="accRole">
+              <option>Owner</option>
+              <option>Admin</option>
+              <option>Moderator</option>
+            </select>
+          </div>
+          <div class="form-actions">
+            <button id="btnSaveAccount" class="btn primary">حفظ الحساب</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <div>© 2026 Salem — لوحة تحكم بوت ديسكورد</div>
+        <div class="muted">مصمم للعرض المحلي والربط مع باك‑إند Node.js أو أي API</div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- SCRIPTS: واجهة تفاعلية بسيطة (تعمل محليًا) -->
+  <script>
+    // بيانات افتراضية محلية (تُستبدل عند الربط بالباك‑إند)
+    const localSettings = {
+      welcomeEnabled: true,
+      welcomeChannel: "",
+      welcomeMessage: "مرحبًا {user} في سيرفرنا!",
+      logEnabled: true,
+      logChannel: "",
+      autoRole: ""
+    };
+
+    // عناصر DOM
+    const botStatus = document.getElementById("botStatus");
+    const lastUpdate = document.getElementById("lastUpdate");
+    const statServers = document.getElementById("statServers");
+    const statUsers = document.getElementById("statUsers");
+    const statCommands = document.getElementById("statCommands");
+    const recentEvents = document.getElementById("recentEvents");
+    const alerts = document.getElementById("alerts");
+
+    // إعدادات النموذج
+    const settingsForm = document.getElementById("settingsForm");
+    const adminPassword = document.getElementById("adminPassword");
+    const welcomeChannel = document.getElementById("welcomeChannel");
+    const welcomeMessage = document.getElementById("welcomeMessage");
+    const logChannel = document.getElementById("logChannel");
+    const enableWelcome = document.getElementById("enableWelcome");
+    const enableLog = document.getElementById("enableLog");
+    const enableAutoRole = document.getElementById("enableAutoRole");
+
+    // تحميل الإعدادات الافتراضية إلى الواجهة
+    function loadLocalSettings() {
+      enableWelcome.checked = localSettings.welcomeEnabled;
+      welcomeChannel.value = localSettings.welcomeChannel;
+      welcomeMessage.value = localSettings.welcomeMessage;
+      enableLog.checked = localSettings.logEnabled;
+      logChannel.value = localSettings.logChannel;
+      document.getElementById("autoRole").value = localSettings.autoRole || "";
+      lastUpdate.textContent = new Date().toLocaleString();
+      statServers.textContent = 1;
+      statUsers.textContent = 123;
+      statCommands.textContent = 12;
+      recentEvents.innerHTML = "<li>تم تشغيل البوت</li><li>تم حفظ الإعدادات</li>";
+    }
+
+    // حفظ الإعدادات محليًا ثم إرسالها للباك‑إند (نموذجي)
+    document.getElementById("btnSaveSettings").addEventListener("click", async () => {
+      // تحقق بسيط على كلمة المرور (محلي)
+      if (!adminPassword.value) {
+        alert("أدخل كلمة المرور لحفظ الإعدادات");
+        return;
+      }
+
+      const payload = {
+        welcomeEnabled: enableWelcome.checked,
+        welcomeChannel: welcomeChannel.value.trim(),
+        welcomeMessage: welcomeMessage.value.trim(),
+        logEnabled: enableLog.checked,
+        logChannel: logChannel.value.trim(),
+        autoRole: document.getElementById("autoRole").value.trim()
+      };
+
+      // حفظ محلي
+      Object.assign(localSettings, payload);
+      lastUpdate.textContent = new Date().toLocaleString();
+      recentEvents.insertAdjacentHTML("afterbegin", "<li>تم حفظ الإعدادات محليًا</li>");
+
+      // إرسال إلى باك‑إند (مثال): استبدل URL بالمسار الفعلي
+      try {
+        const res = await fetch("/api/save-settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          recentEvents.insertAdjacentHTML("afterbegin", "<li>تم حفظ الإعدادات على الخادم</li>");
+        } else {
+          recentEvents.insertAdjacentHTML("afterbegin", "<li class='warn'>فشل حفظ الإعدادات على الخادم</li>");
+        }
+      } catch (err) {
+        recentEvents.insertAdjacentHTML("afterbegin", "<li class='warn'>خطأ في الاتصال بالباك‑إند</li>");
+      }
+    });
+
+    // زر إعادة التعيين
+    document.getElementById("btnResetSettings").addEventListener("click", () => {
+      if (!confirm("هل تريد إعادة الإعدادات إلى الافتراضي؟")) return;
+      Object.assign(localSettings, {
+        welcomeEnabled: false,
+        welcomeChannel: "",
+        welcomeMessage: "مرحبًا {user}",
+        logEnabled: false,
+        logChannel: "",
+        autoRole: ""
+      });
+      loadLocalSettings();
+      recentEvents.insertAdjacentHTML("afterbegin", "<li>تم إعادة تعيين الإعدادات</li>");
+    });
+
+    // أوامر: إضافة أمر جديد (نموذجي)
+    document.getElementById("btnNewCmd").addEventListener("click", () => {
+      document.getElementById("cmdModalTitle").textContent = "أمر جديد";
+      document.getElementById("cmdModal").classList.remove("hidden");
+    });
+
+    // إغلاق نموذج الأمر
+    document.getElementById("btnCancelCmd").addEventListener("click", () => {
+      document.getElementById("cmdModal").classList.add("hidden");
+    });
+
+    // حفظ أمر جديد (محلي)
+    document.getElementById("btnSaveCmd").addEventListener("click", () => {
+      const name = document.getElementById("cmdName").value.trim();
+      const desc = document.getElementById("cmdDesc").value.trim();
+      const perm = document.getElementById("cmdPerm").value;
+      const resp = document.getElementById("cmdResponse").value.trim();
+
+      if (!name) {
+        alert("أدخل اسم الأمر");
+        return;
+      }
+
+      const cmdItem = document.createElement("div");
+      cmdItem.className = "cmd-item";
+      cmdItem.innerHTML = `
+        <div class="cmd-head">
+          <strong>${name}</strong>
+          <span class="muted">${perm}</span>
+        </div>
+        <div class="cmd-body">
+          <p>${desc}</p>
+          <pre class="cmd-resp">${resp}</pre>
+          <div class="cmd-actions">
+            <button class="btn small">تعديل</button>
+            <button class="btn small danger">حذف</button>
+            <label><input type="checkbox" checked /> مفعل</label>
+          </div>
+        </div>
+      `;
+      document.getElementById("commandsList").prepend(cmdItem);
+      document.getElementById("cmdModal").classList.add("hidden");
+      recentEvents.insertAdjacentHTML("afterbegin", `<li>أضيف الأمر ${name}</li>`);
+    });
+
+    // تحميل أولي
+    loadLocalSettings();
+
+    // محاكاة تحديث الحالة كل 10 ثواني
+    setInterval(() => {
+      const now = new Date();
+      lastUpdate.textContent = now.toLocaleString();
+    }, 10000);
+
+    // تسجيل خروج (محلي)
+    document.getElementById("btnLogout").addEventListener("click", () => {
+      alert("تم تسجيل الخروج محليًا");
+      // هنا يمكنك توجيه المستخدم لصفحة تسجيل الدخول أو مسح الجلسة
+    });
+
+    // عناصر إضافية: تصدير/استعادة نسخ احتياطية (محلي)
+    document.getElementById("btnCreateBackup").addEventListener("click", () => {
+      const data = JSON.stringify(localSettings, null, 2);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "salem-bot-backup.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      document.getElementById("backupStatus").textContent = "تم إنشاء نسخة احتياطية محليًا";
+    });
+
+    document.getElementById("btnRestoreBackup").addEventListener("click", async () => {
+      const fileInput = document.getElementById("backupFile");
+      if (!fileInput.files.length) {
+        alert("اختر ملف النسخة الاحتياطية أولًا");
+        return;
+      }
+      const file = fileInput.files[0];
+      const text = await file.text();
+      try {
+        const obj = JSON.parse(text);
+        Object.assign(localSettings, obj);
+        loadLocalSettings();
+        document.getElementById("backupStatus").textContent = "تم استعادة النسخة بنجاح";
+      } catch (e) {
+        alert("ملف غير صالح");
+      }
+    });
+
+    // ملاحظة: الرسوم البيانية (canvas) تحتاج مكتبة مثل Chart.js عند الربط الفعلي
+  </script>
+
+  <!-- نهاية الملف -->
+</body>
+</html>
